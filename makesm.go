@@ -54,11 +54,15 @@ import (
 	"time"
 )
 
-var mySMFLAVOUR = "v3.0"
-var srcFolder = flag.String("src", ".", "Path to ScoreMaster source")
-var phpFolder = flag.String("php", "C:\\PHP", "Path to PHP installation (Windows only)")
+var mySMFLAVOUR = "v3.1"
+var srcFolder = flag.String("sm3", filepath.Join("..", "sm3"), "Path to ScoreMaster source")
+var runsmFolder = flag.String("runsm", filepath.Join("..", "runsm"), "Path to RunSM folder")
+var ebcfetchFolder = flag.String("ebcfetch", filepath.Join("..", "ebcfetch"), "Path to EBCFetch folder")
+var smpatchFolder = flag.String("smpatch", filepath.Join("..", "smpatch"), "Path to SMPatch folder")
+var phpFolder = flag.String("php", filepath.Join("C:\\", "PHP"), "Path to PHP installation (Windows only)")
 var targetFolder = flag.String("target", "", "Path for new installation")
 var db2Use = flag.String("db", "v", "v=virgin,r=rblr,l=live database")
+var rblr = flag.Bool("rblr", false, "Include the extras for the RBLR1000")
 var lang2use = flag.String("lang", "en", "Language code (en,de)")
 var overwriteok = flag.Bool("ok", false, "Overwrite existing target")
 var nodebug = flag.Bool("nodebug", false, "Don't produce debugsm")
@@ -79,7 +83,7 @@ var mySMFILES = [...]string{
 	"entrants.php", "exportxls.php", "emails.php",
 	"favicon.ico", "importxls.php", "index.php",
 	"Parsedown.php", "picklist.php",
-	"licence.txt", "reboot.css", "recalc.js", "recalc.php",
+	"LICENSE", "reboot.css", "recalc.js", "recalc.php",
 	"setup.php", "score.css", "score.js", "score.php", "scorecard.php", "scoring.php", "sm.php",
 	"showhelp.php",
 	"speeding.php", "teams.php", "utils.php", "timep.php", "cats.php",
@@ -176,12 +180,12 @@ func checkPrerequisites() {
 	var ok = true
 	var sqlitetest = binexe(filepath.Join(*srcFolder, utilsFolder, sqlite3))
 	var caddytest = binexe(filepath.Join(*srcFolder, utilsFolder, caddy))
-	var runtest = binexe(filepath.Join(*srcFolder, "runsm", "runsm"))
+	var runtest = binexe(filepath.Join(*runsmFolder, "runsm"))
 	var cgitest = binexe(filepath.Join(*srcFolder, utilsFolder, phpcgi))
 	var jodittest = filepath.Join(*srcFolder, "jodit")
 	var vendortest = filepath.Join(*srcFolder, "vendor")
-	var ebcfetchtest = binexe(filepath.Join(*srcFolder, utilsFolder, ebcfetch))
-	var smpatchtest = binexe(filepath.Join(*srcFolder, utilsFolder, smpatch))
+	var ebcfetchtest = binexe(filepath.Join(*ebcfetchFolder, ebcfetch))
+	var smpatchtest = binexe(filepath.Join(*smpatchFolder, smpatch))
 
 	if runtime.GOOS == "windows" && !fileOrFolderExists(*phpFolder) {
 		log.Printf("*** %s does not exist!", *phpFolder)
@@ -203,12 +207,12 @@ func checkPrerequisites() {
 	}
 	if !fileOrFolderExists(ebcfetchtest) {
 		log.Printf("*** %s does not exist!", ebcfetchtest)
-		log.Printf("*** Please download from github, generate and place in %v", utilsFolder)
+		log.Printf("*** Please build or download from github")
 		ok = false
 	}
 	if !fileOrFolderExists(smpatchtest) {
 		log.Printf("*** %s does not exist!", smpatchtest)
-		log.Printf("*** Please download from github, generate and place in %v", utilsFolder)
+		log.Printf("*** Please build or download from github")
 		ok = false
 	}
 	if !fileOrFolderExists(caddytest) {
@@ -228,7 +232,7 @@ func checkPrerequisites() {
 	}
 	if !fileOrFolderExists(runtest) {
 		log.Printf("*** %s does not exist!", runtest)
-		log.Printf("*** You must do 'go build runsm.go'")
+		log.Printf("*** You must do build it or use '-run' to point me to it")
 		ok = false
 	}
 	if !ok {
@@ -243,17 +247,17 @@ func copyDatabase() {
 	if *db2Use != "l" {
 
 		if !loadSQL("ScoreMaster.sql") {
-			log.Fatal("Can't load ScoreMaster.sql")
+			log.Fatal("*** can't load ScoreMaster.sql")
 		}
 		if *lang2use != "en" {
 			if !loadSQL("Reasons-" + *lang2use + ".sql") {
-				log.Fatal("Can't load foreign reasons")
+				log.Fatal("*** can't load foreign reasons")
 			}
 		}
-		if *db2Use == "r" {
+		if *rblr || *db2Use == "r" {
 			log.Print("Loading RBLR certificates")
 			if !loadSQL("rblrcerts.sql") {
-				log.Fatal("Can't load rblrcerts.sql")
+				log.Fatal("*** can't load rblrcerts.sql")
 			}
 		}
 	} else {
@@ -279,11 +283,11 @@ func copyExecs() {
 	log.Print("Copying executables")
 
 	copyExec(filepath.Join(*srcFolder, utilsFolder, caddy), filepath.Join(*targetFolder, "caddy", caddy))
-	copyExec(filepath.Join(*srcFolder, utilsFolder, ebcfetch), filepath.Join(*targetFolder, "caddy", ebcfetch))
-	copyExec(filepath.Join(*srcFolder, utilsFolder, smpatch), filepath.Join(*targetFolder, smpatch))
-	copyExec(filepath.Join(*srcFolder, utilsFolder, "runsm"), filepath.Join(*targetFolder, "runsm"))
+	copyExec(filepath.Join(*ebcfetchFolder, ebcfetch), filepath.Join(*targetFolder, "caddy", ebcfetch))
+	copyExec(filepath.Join(*smpatchFolder, smpatch), filepath.Join(*targetFolder, smpatch))
+	copyExec(filepath.Join(*runsmFolder, "runsm"), filepath.Join(*targetFolder, "runsm"))
 	if !*nodebug {
-		copyExec(filepath.Join(*srcFolder, utilsFolder, "runsm"), filepath.Join(*targetFolder, "debugsm"))
+		copyExec(filepath.Join(*runsmFolder, "runsm"), filepath.Join(*targetFolder, "debugsm"))
 	}
 }
 
@@ -310,7 +314,7 @@ func copyFile(src, dst string) (int64, error) {
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
 	if err != nil {
-		log.Fatal("Can't copy file " + src)
+		log.Fatal("*** can't copy file " + src)
 	}
 	return nBytes, err
 }
@@ -385,7 +389,7 @@ func copyImages() {
 
 	log.Print("Copying images")
 	copyImageSet(myIMAGES[:])
-	if *db2Use == "r" {
+	if *rblr || *db2Use == "r" {
 		copyImageSet(rblrIMAGES[:])
 	}
 }
@@ -395,7 +399,7 @@ func copyImageSet(set []string) {
 	for _, img := range set {
 		_, err := copyFile(filepath.Join(*srcFolder, "images", img), filepath.Join(smFolder, "images", img))
 		if err != nil {
-			log.Fatalf("*** Can't copy image %s (%s)", img, err)
+			log.Fatalf("*** can't copy image %s (%s)", img, err)
 		}
 	}
 
@@ -480,13 +484,13 @@ func copySMFiles() {
 	for _, s := range mySMFILES {
 		_, err := copyFile(filepath.Join(*srcFolder, s), filepath.Join(smFolder, s))
 		if err != nil {
-			log.Println("Can't copy " + s)
+			log.Println("*** can't copy " + s)
 		}
 	}
 	for _, s := range myLANGFILES {
 		_, err := copyFile(filepath.Join(*srcFolder, strings.Replace(s, ".", lng, 1)), filepath.Join(smFolder, s))
 		if err != nil {
-			log.Println("Can't copy " + s + lng)
+			log.Println("*** can't copy " + s + lng)
 		}
 	}
 }
@@ -511,7 +515,7 @@ func loadSQL(sqlfile string) bool {
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		log.Printf("%v\n", err)
-		log.Fatal("Can't load database from SQL")
+		log.Fatal("*** can't load database from SQL")
 	}
 	go func() {
 		defer stdin.Close()
@@ -524,7 +528,7 @@ func loadSQL(sqlfile string) bool {
 func makeFolder(folder string) {
 
 	if !establishFolder(folder) {
-		log.Fatal("Can't establish folder " + folder)
+		log.Fatal("*** can't establish folder " + folder)
 	}
 
 }
