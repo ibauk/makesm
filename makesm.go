@@ -54,7 +54,7 @@ import (
 	"time"
 )
 
-var mySMFLAVOUR = "v3.1"
+var mySMFLAVOUR = "v3.2.1"
 var srcFolder = flag.String("sm3", filepath.Join("..", "sm3"), "Path to ScoreMaster source")
 var runsmFolder = flag.String("runsm", filepath.Join("..", "runsm"), "Path to RunSM folder")
 var ebcfetchFolder = flag.String("ebcfetch", filepath.Join("..", "ebcfetch"), "Path to EBCFetch folder")
@@ -80,10 +80,10 @@ var mySMFILES = [...]string{
 	"about.php", "admin.php", "bonuses.php",
 	"certedit.php", "certificate.css", "certificate.php", "claims.php", "claimslog.php",
 	"claimsphp.js", "cohorts.php", "combos.php", "common.php",
-	"entrants.php", "exportxls.php", "emails.php",
+	"entrants.php", "exportxls.php", "emails.php", "fastodos.php",
 	"favicon.ico", "importxls.php", "index.php",
 	"Parsedown.php", "picklist.php",
-	"LICENSE", "reboot.css", "recalc.js", "recalc.php",
+	"LICENSE", "reboot.css", "recalc.js", "recalc.php", "restbonuses.php",
 	"setup.php", "score.css", "score.js", "score.php", "scorecard.php", "scoring.php", "sm.php",
 	"showhelp.php",
 	"speeding.php", "teams.php", "utils.php", "timep.php", "cats.php",
@@ -97,7 +97,7 @@ var myLANGFILES = [...]string{
 var myIMAGES = [...]string{
 	"ibauk.png", "ibauk90.png",
 	"alertalert.png", "alertbike.png", "alertface.png", "alertdaylight.png",
-	"alertreceipt.png", "alertrestricted.png", "alertteam.png",
+	"alertnight.png", "alertreceipt.png", "alertrestricted.png", "alertteam.png",
 }
 
 var rblrIMAGES = [...]string{
