@@ -43,7 +43,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -80,7 +79,7 @@ var mySMFILES = [...]string{
 	"about.php", "admin.php", "bonuses.php",
 	"certedit.php", "certificate.css", "certificate.php", "claims.php", "claimslog.php",
 	"claimsphp.js", "cohorts.php", "combos.php", "common.php",
-	"entrants.php", "exportxls.php", "emails.php", "fastodos.php",
+	"entrants.php", "exportxls.php", "emails.php", "fastodos.php", "fastodosphp.js",
 	"favicon.ico", "importxls.php", "index.php",
 	"Parsedown.php", "picklist.php",
 	"LICENSE", "reboot.css", "recalc.js", "recalc.php", "restbonuses.php",
@@ -321,7 +320,7 @@ func copyFile(src, dst string) (int64, error) {
 
 func copyFolderTree(src string, dst string) error {
 	var err error
-	var fds []os.FileInfo
+	var fds []os.DirEntry
 	var srcinfo os.FileInfo
 
 	if srcinfo, err = os.Stat(src); err != nil {
@@ -332,7 +331,7 @@ func copyFolderTree(src string, dst string) error {
 		return err
 	}
 
-	if fds, err = ioutil.ReadDir(src); err != nil {
+	if fds, err = os.ReadDir(src); err != nil {
 		return err
 	}
 	for _, fd := range fds {
@@ -355,7 +354,7 @@ func copyFolderTree(src string, dst string) error {
 func copyHelp(srcpath string, dstpath string, folder string) error {
 
 	var err error
-	var fds []os.FileInfo
+	var fds []os.DirEntry
 	var mdre = regexp.MustCompile(`\.md`)
 
 	src := filepath.Join(srcpath, folder)
@@ -363,7 +362,7 @@ func copyHelp(srcpath string, dstpath string, folder string) error {
 
 	makeFolder(dst)
 
-	if fds, err = ioutil.ReadDir(src); err != nil {
+	if fds, err = os.ReadDir(src); err != nil {
 		return err
 	}
 	for _, fd := range fds {
@@ -510,7 +509,7 @@ func generateHelp() {
 
 func loadSQL(sqlfile string) bool {
 
-	sql, _ := ioutil.ReadFile(filepath.Join(*srcFolder, sqlfile))
+	sql, _ := os.ReadFile(filepath.Join(*srcFolder, sqlfile))
 	cmd := exec.Command(filepath.Join(*srcFolder, utilsFolder, sqlite3), filepath.Join(smFolder, "ScoreMaster.db"))
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
