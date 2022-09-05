@@ -78,11 +78,11 @@ var helpFolder = "help"
 var mySMFILES = [...]string{
 	"about.php", "admin.php", "bonuses.php",
 	"certedit.php", "certificate.css", "certificate.php", "claims.php", "claimslog.php",
-	"claimsphp.js", "cohorts.php", "combos.php", "common.php",
+	"claimsphp.js", "cohorts.php", "combos.php", "common.php", "ereviews.php",
 	"entrants.php", "exportxls.php", "emails.php", "fastodos.php", "fastodosphp.js",
 	"favicon.ico", "importxls.php", "index.php",
 	"Parsedown.php", "picklist.php",
-	"LICENSE", "reboot.css", "recalc.js", "recalc.php", "restbonuses.php",
+	"LICENSE", "reboot.css", "recalc.js", "recalc.php", "restbonuses.php", "scorex.php",
 	"setup.php", "score.css", "score.js", "score.php", "scorecard.php", "scoring.php", "sm.php",
 	"showhelp.php",
 	"speeding.php", "teams.php", "utils.php", "timep.php", "cats.php",
