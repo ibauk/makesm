@@ -53,7 +53,7 @@ import (
 	"time"
 )
 
-var mySMFLAVOUR = "v3.2.1"
+var mySMFLAVOUR = "v3.3"
 var srcFolder = flag.String("sm3", filepath.Join("..", "sm3"), "Path to ScoreMaster source")
 var runsmFolder = flag.String("runsm", filepath.Join("..", "runsm"), "Path to RunSM folder")
 var ebcfetchFolder = flag.String("ebcfetch", filepath.Join("..", "ebcfetch"), "Path to EBCFetch folder")
@@ -80,7 +80,7 @@ var mySMFILES = [...]string{
 	"certedit.php", "certificate.css", "certificate.php", "claims.php", "claimslog.php",
 	"claimsphp.js", "cohorts.php", "combos.php", "common.php", "ereviews.php",
 	"entrants.php", "exportxls.php", "emails.php", "fastodos.php", "fastodosphp.js",
-	"favicon.ico", "importxls.php", "index.php",
+	"favicon.ico", "importxls.php", "index.php", "legs.js", "legs.php",
 	"Parsedown.php", "picklist.php",
 	"LICENSE", "reboot.css", "recalc.js", "recalc.php", "restbonuses.php", "scorex.php",
 	"setup.php", "score.css", "score.js", "score.php", "scorecard.php", "scoring.php", "sm.php",
