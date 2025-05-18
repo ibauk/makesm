@@ -81,7 +81,7 @@ var mySMFILES = [...]string{
 	"claimsphp.js", "cohorts.php", "combos.php", "common.php", "ereviews.php",
 	"entrants.php", "exportxls.php", "emails.php", "fastodos.php", "fastodosphp.js",
 	"favicon.ico", "importxls.php", "index.php", "legs.js", "legs.php",
-	"Parsedown.php", "picklist.php", "reports.php",
+	"Parsedown.php", "picklist.php", "reports.php", "readyset.php",
 	"LICENSE", "reboot.css", "recalc.js", "recalc.php", "restbonuses.php", "scorex.php",
 	"setup.php", "score.css", "score.js", "score.php", "scorecard.php", "scoring.php", "sm.php",
 	"showhelp.php",
@@ -193,7 +193,7 @@ func checkPrerequisites() {
 		ok = false
 	}
 
-	if runtime.GOOS != "windows" && !fileOrFolderExists(cgitest) {
+	if runtime.GOOS != "windows" && runtime.GOOS != "linux" && !fileOrFolderExists(cgitest) {
 		log.Printf("*** %s does not exist!", cgitest)
 		log.Printf("*** You must obtain a copy - compile PHP from source?")
 		log.Printf("*** Be sure to use my php.ini rather than the default")
