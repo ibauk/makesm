@@ -81,7 +81,7 @@ var mySMFILES = [...]string{
 	"claimsphp.js", "cohorts.php", "combos.php", "common.php", "ereviews.php",
 	"entrants.php", "exportxls.php", "emails.php", "fastodos.php", "fastodosphp.js",
 	"favicon.ico", "importxls.php", "index.php", "legs.js", "legs.php",
-	"Parsedown.php", "picklist.php", "reports.php", "readyset.php",
+	"Parsedown.php", "picklist.php", "reports.php", "readyset.php", "reset.php",
 	"LICENSE", "reboot.css", "recalc.js", "recalc.php", "restbonuses.php", "scorex.php",
 	"setup.php", "score.css", "score.js", "score.php", "scorecard.php", "scoring.php", "sm.php",
 	"showhelp.php",
@@ -199,22 +199,22 @@ func checkPrerequisites() {
 		log.Printf("*** Be sure to use my php.ini rather than the default")
 		ok = false
 	}
-	if !fileOrFolderExists(sqlitetest) {
+	if runtime.GOOS != "linux" && !fileOrFolderExists(sqlitetest) {
 		log.Printf("*** %s does not exist!", sqlitetest)
 		log.Printf("*** Please download from sqlite.org")
 		ok = false
 	}
-	if !fileOrFolderExists(ebcfetchtest) {
+	if runtime.GOOS != "linux" && !fileOrFolderExists(ebcfetchtest) {
 		log.Printf("*** %s does not exist!", ebcfetchtest)
 		log.Printf("*** Please build or download from github")
 		ok = false
 	}
-	if !fileOrFolderExists(smpatchtest) {
+	if runtime.GOOS != "linux" && !fileOrFolderExists(smpatchtest) {
 		log.Printf("*** %s does not exist!", smpatchtest)
 		log.Printf("*** Please build or download from github")
 		ok = false
 	}
-	if !fileOrFolderExists(caddytest) {
+	if runtime.GOOS != "linux" && !fileOrFolderExists(caddytest) {
 		log.Printf("*** %s does not exist!", caddytest)
 		log.Printf("*** You must have a working Caddy installation. Download from github.com/caddyserver/caddy)")
 		ok = false
@@ -229,7 +229,7 @@ func checkPrerequisites() {
 		log.Printf("*** You probably need to run 'composer install' (download from getcomposer.org")
 		ok = false
 	}
-	if !fileOrFolderExists(runtest) {
+	if runtime.GOOS != "linux" && !fileOrFolderExists(runtest) {
 		log.Printf("*** %s does not exist!", runtest)
 		log.Printf("*** You must do build it or use '-run' to point me to it")
 		ok = false
@@ -264,7 +264,7 @@ func copyDatabase() {
 	}
 
 	// Now make a copy to provide a simple means of starting again if necessary
-	copyFile(filepath.Join(smFolder, "ScoreMaster.db"), filepath.Join(smFolder, "ScoreMaster-empty.db"))
+	// copyFile(filepath.Join(smFolder, "ScoreMaster.db"), filepath.Join(smFolder, "ScoreMaster-empty.db"))
 
 }
 
@@ -278,6 +278,10 @@ func copyExec(src, dst string) {
 
 }
 func copyExecs() {
+
+	if runtime.GOOS == "linux" {
+		return
+	}
 
 	log.Print("Copying executables")
 
@@ -421,23 +425,6 @@ func copyMarkdown(src string, dst string) {
 	dstname := strings.Replace(dst, ".md", ".hlp", -1)
 	copyFile(src, dstname)
 
-	/**
-	file, err := os.Open(src)
-	if err != nil {
-		log.Panicf("failed reading file: %s", err)
-	}
-	defer file.Close()
-	txt, _ := ioutil.ReadAll(file)
-	html := blackfriday.MarkdownCommon(txt)
-	f, err := os.Create(dstname)
-	if err != nil {
-		log.Panicf("failed creating file: %s", err)
-	}
-	w := bufio.NewWriter(f)
-	w.Write(html)
-	w.Flush()
-	f.Close()
-	**/
 }
 
 func copyPHP() {
@@ -447,7 +434,7 @@ func copyPHP() {
 		if err := copyFolderTree(*phpFolder, filepath.Join(*targetFolder, "php")); err != nil {
 			log.Fatalf("*** FAILED copying folder: %s", err)
 		}
-	} else {
+	} else if runtime.GOOS != "linux" {
 		cgi := filepath.Join(*srcFolder, utilsFolder, phpcgi)
 		if _, err := os.Stat(cgi); err == nil {
 			tgtcgi := filepath.Join(*targetFolder, "php", "php-cgi")
